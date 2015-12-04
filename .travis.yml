@@ -1,6 +1,0 @@
-language: go
-
-script:
-  - mkdir src
-  - go get github.com/a2n/alu
-  - go test
