@@ -8,11 +8,13 @@ import (
 	"github.com/a2n/alu"
 )
 
+// Zone 結構。
 type Zone struct {
 	NS NS
 	DNSSEC []DNSSEC
 }
 
+// Zone 服務結構。
 type ZoneService struct {
 	Service *Service
 	cs *ConfigService
@@ -20,16 +22,19 @@ type ZoneService struct {
 	zone string
 }
 
+// 取得列舉 zone 調用結構。
 func (zs *ZoneService) List() *ZoneListCall {
 	return &ZoneListCall {
 		Service: zs.Service,
 	}
 }
 
+// zone 列舉調用結構。
 type ZoneListCall struct {
 	Service *Service
 }
 
+// 執行 zone 列舉調用。
 func (zlc *ZoneListCall) Do() map[string]Zone {
 	urlstr := ENDPOINT + "/index.htm"
 	req, err := http.NewRequest("GET", urlstr, nil)
@@ -51,6 +56,7 @@ func (zlc *ZoneListCall) Do() map[string]Zone {
 	return zlc.Parse(b)
 }
 
+// 解析 zone 列舉調用結果。
 func (zlc *ZoneListCall) Parse(raw []byte) map[string]Zone {
 	zones := make(map[string]Zone)
 	if len(raw) == 0 {

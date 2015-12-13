@@ -1,4 +1,7 @@
 package pchome
+/*
+	指令操作 PCHome 買網址	
+ */
 
 import (
 	"time"
@@ -14,17 +17,21 @@ import (
 	"github.com/a2n/alu"
 )
 
+// 預設的組態檔案位置
 const DefaultConfigPath = ".pchome"
 
+// 組態服務結構
 type ConfigService struct {
 	Service *Service
 }
 
+// 取得組態服務。
 func NewConfigService() *ConfigService {
 	logger = alu.NewLogger("log")
 	return &ConfigService{}
 }
 
+// 初始組態服務
 func (cs *ConfigService) Init() error {
 	b, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
@@ -46,6 +53,7 @@ func (cs *ConfigService) Init() error {
 	return nil
 }
 
+// 初始全新組態。
 func (cs *ConfigService) initNew() error {
 	config := Config {
 		UpdatedAt: time.Now().Unix(),
@@ -99,6 +107,7 @@ func (cs *ConfigService) initNew() error {
 	return nil
 }
 
+// 取得 PCHome 存取鑰匙
 func (cs *ConfigService) GetKey() (string, error) {
 	config, err := cs.Read()
 	if err != nil {
@@ -113,6 +122,7 @@ func (cs *ConfigService) GetKey() (string, error) {
 	return key, nil
 }
 
+// 從網站取得 PCHome 存取鑰匙
 func (cs *ConfigService) DoGetKey(email, password string) (string, error) {
 	if len(email) == 0 {
 		logger.Printf("%s has empty email.", alu.Caller())
@@ -151,6 +161,7 @@ func (cs *ConfigService) DoGetKey(email, password string) (string, error) {
 	return key, nil
 }
 
+// 更新組態內容。
 func (cs *ConfigService) Update() error {
 	// Open
 	config, err := cs.Read()
@@ -178,6 +189,7 @@ func (cs *ConfigService) Update() error {
 	return nil
 }
 
+// 更新 zone 內容。
 func (cs *ConfigService) UpdateZones(s *Service) (map[string]Zone, error) {
 	zones := s.NewZoneService().List().Do()
 	keys := make([]string, 0)
@@ -212,6 +224,7 @@ func (cs *ConfigService) UpdateZones(s *Service) (map[string]Zone, error) {
 	return zone, nil
 }
 
+// 讀取本地組態。
 func (cs *ConfigService) Read() (Config, error) {
 	b, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
@@ -229,6 +242,7 @@ func (cs *ConfigService) Read() (Config, error) {
 	return config, nil
 }
 
+// 移除組態檔案。
 func (cs *ConfigService) Remove() error {
 	err := os.Remove(DefaultConfigPath)
 	if err != nil {
@@ -240,6 +254,7 @@ func (cs *ConfigService) Remove() error {
 	return nil
 }
 
+// 儲存組態內容。
 func (cs *ConfigService) Save(config *Config) error {
 	if config == nil {
 		logger.Printf("%s has nil config.", alu.Caller())
@@ -285,6 +300,7 @@ func (cs *ConfigService) Save(config *Config) error {
 	return nil
 }
 
+// 登出 PChome 網站。
 func (cs *ConfigService) Logout() error {
 	if len(cs.Service.Key) == 0 {
 		return errors.New("Empty access token.")
@@ -306,6 +322,7 @@ func (cs *ConfigService) Logout() error {
 	return nil
 }
 
+// 組態結構，記錄 Email、密碼、Zones 和最後更新時間。
 type Config struct {
 	Email string
 	Password string

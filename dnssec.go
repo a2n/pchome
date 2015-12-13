@@ -12,12 +12,14 @@ import (
 	"github.com/a2n/alu"
 )
 
+// DNSSEC 結構，有 KeyTag、Algorithm 和 Digest。
 type DNSSEC struct {
 	KeyTag uint16
 	Algorithm uint8
 	Digest string
 }
 
+// DNSSEC 服務結構
 type DNSSECService struct {
 	Service *Service
 	cs *ConfigService
@@ -25,6 +27,7 @@ type DNSSECService struct {
 	zone string
 }
 
+// 添加 DNSSEC 記錄。
 func (ds *DNSSECService) Add(zone string, keyTag uint16, algorithm uint8, digest string) error {
 	ds.cs = NewConfigService()
 	config, err := ds.cs.Read()
@@ -67,6 +70,7 @@ func (ds *DNSSECService) Add(zone string, keyTag uint16, algorithm uint8, digest
 	return nil
 }
 
+// 移除 DNSSEC 記錄。
 func (ds *DNSSECService) Delete(zone string, keyTag uint16, algorithm uint8, digest string) error {
 	ds.cs = NewConfigService()
 	config, err := ds.cs.Read()
@@ -102,6 +106,7 @@ func (ds *DNSSECService) Delete(zone string, keyTag uint16, algorithm uint8, dig
 	return nil
 }
 
+// 提交 DNSSEC 記錄到 PChome 網站。
 func (ds *DNSSECService) save() error {
 	reader := strings.NewReader(ds.preparePostData().Encode())
 	urlstr := ENDPOINT + "/set_dnssec.php"
@@ -124,6 +129,7 @@ func (ds *DNSSECService) save() error {
 	return nil
 }
 
+// 準備提交的表單資料。
 func (ds *DNSSECService) preparePostData() url.Values {
 	data := url.Values{}
 
@@ -144,6 +150,7 @@ func (ds *DNSSECService) preparePostData() url.Values {
 	return data
 }
 
+// 列舉 PChome 網站的 DNSSEC 記錄。
 func (ds *DNSSECService) List(zone string) ([]DNSSEC, error) {
 	if len(zone) == 0 {
 		logger.Fatalf("%s has empty zone name.", alu.Caller())
@@ -177,6 +184,7 @@ func (ds *DNSSECService) List(zone string) ([]DNSSEC, error) {
 	return slice, nil
 }
 
+// 解析 PChome DNSSEC 網頁。
 func (ds *DNSSECService) parse(raw []byte) ([]DNSSEC, error) {
 	if len(raw) == 0 {
 		logger.Printf("%s has empty raw.", alu.Caller())

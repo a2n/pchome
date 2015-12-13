@@ -12,7 +12,10 @@ import (
 	"github.com/a2n/alu"
 )
 
+// Name server 結構。
 type NS map[string]string
+
+// NS 服務結構。
 type NSService struct {
 	Service *Service
 	cs *ConfigService
@@ -20,6 +23,7 @@ type NSService struct {
 	zone string
 }
 
+// 添加 NS 記錄。
 func (ns *NSService) Add(zone, name, ip string) error {
 	ns.cs = NewConfigService()
 	config, err := ns.cs.Read()
@@ -52,6 +56,7 @@ func (ns *NSService) Add(zone, name, ip string) error {
 	return nil
 }
 
+// 移除 NS 記錄。
 func (ns *NSService) Delete(zone, name, ip string) error {
 	ns.cs = NewConfigService()
 	config, err := ns.cs.Read()
@@ -85,6 +90,7 @@ func (ns *NSService) Delete(zone, name, ip string) error {
 	return nil
 }
 
+// 更新 NS 記錄。
 func (ns *NSService) Update(zone, name, ip string) error {
 	ns.cs = NewConfigService()
 	config, err := ns.cs.Read()
@@ -115,6 +121,7 @@ func (ns *NSService) Update(zone, name, ip string) error {
 	return nil
 }
 
+// 提交 NS 記錄到 PChome 網站。
 func (ns *NSService) save() error {
 	reader := strings.NewReader(ns.preparePostData().Encode())
 	urlstr := ENDPOINT + "/dns_edit.php"
@@ -139,6 +146,7 @@ func (ns *NSService) save() error {
 	return nil
 }
 
+// 準備提交的表單資料。
 func (ns *NSService) preparePostData() url.Values {
 	data := url.Values{}
 
@@ -168,6 +176,8 @@ func (ns *NSService) preparePostData() url.Values {
 
 	return data
 }
+
+// 列舉 PChome 網站的 NS 記錄。
 func (ns *NSService) List(zone string) (NS, error) {
 	if len(zone) == 0 {
 		logger.Fatalf("%s has empty zone name.", alu.Caller())
@@ -200,6 +210,7 @@ func (ns *NSService) List(zone string) (NS, error) {
 	return slice, nil
 }
 
+// 解析 PChome DNSSEC 網頁。
 func (ns *NSService) parse(raw []byte) (NS, error) {
 	if len(raw) == 0 {
 		logger.Printf("%s has empty raw.", alu.Caller())
