@@ -38,7 +38,7 @@ func (ds *DNSSECService) Add(zone string, keyTag uint16, algorithm uint8, digest
 
 	// Zone
 	if _, ok := ds.config.Zones[zone]; !ok {
-		logger.Fatal("%s has no such zone name, %s.", alu.Caller(), zone)
+		logger.Printf("%s has no such zone name, %s.", alu.Caller(), zone)
 		return errors.New("No such zone name")
 	}
 	zoneObj := ds.config.Zones[zone]
@@ -46,14 +46,14 @@ func (ds *DNSSECService) Add(zone string, keyTag uint16, algorithm uint8, digest
 
 	// Max records count.
 	if len(zoneObj.DNSSEC) == 5 {
-		logger.Fatal("%s, the zone(%s) has reached the max DNESEC records count 5.", alu.Caller(), zone)
+		logger.Printf("%s, the zone(%s) has reached the max DNESEC records count 5.", alu.Caller(), zone)
 		return errors.New("The DNSSEC records of this zone is reaching the max count 5, delete some records first.\n")
 	}
 
 	// Find existed records.
 	for _, dnssec := range zoneObj.DNSSEC {
 		if dnssec.KeyTag == keyTag && dnssec.Algorithm == algorithm && dnssec.Digest == digest {
-			logger.Fatal("%s has duplicated.")
+			logger.Printf("%s has duplicated.")
 			return errors.New("Duplicated record.")
 		}
 	}
@@ -81,7 +81,7 @@ func (ds *DNSSECService) Delete(zone string, keyTag uint16, algorithm uint8, dig
 
 	// Zone
 	if _, ok := ds.config.Zones[zone]; !ok {
-		logger.Fatal("%s has no matched zone name, %s.", alu.Caller(), zone)
+		logger.Printf("%s has no matched zone name, %s.", alu.Caller(), zone)
 		return errors.New("No matched zone name.")
 	}
 	zoneObj := ds.config.Zones[zone]
@@ -99,7 +99,7 @@ func (ds *DNSSECService) Delete(zone string, keyTag uint16, algorithm uint8, dig
 		}
 	}
 	if !found {
-		logger.Fatalf("%s has no matched DNSSEC record.", alu.Caller())
+		logger.Printf("%s has no matched DNSSEC record.", alu.Caller())
 		return errors.New("No matched DNSSEC record.")
 	}
 
@@ -112,7 +112,7 @@ func (ds *DNSSECService) save() error {
 	urlstr := ENDPOINT + "/set_dnssec.php"
 	req, err := http.NewRequest("POST", urlstr, reader)
 	if err != nil {
-		logger.Fatalf("%s creates http request failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s creates http request failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Creating http request failed.")
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -153,13 +153,13 @@ func (ds *DNSSECService) preparePostData() url.Values {
 // 列舉 PChome 網站的 DNSSEC 記錄。
 func (ds *DNSSECService) List(zone string) ([]DNSSEC, error) {
 	if len(zone) == 0 {
-		logger.Fatalf("%s has empty zone name.", alu.Caller())
+		logger.Printf("%s has empty zone name.", alu.Caller())
 	}
 
 	urlstr := "http://myname.pchome.com.tw/manage/set_dnssec.htm?dn=" + zone
 	req, err := http.NewRequest("GET", urlstr, nil)
 	if err != nil {
-		logger.Fatalf("%s creates http request failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s creates http request failed, %s.", alu.Caller(), err.Error())
 		return nil, errors.New("Cannot create a http request.")
 	}
 	ds.Service.SetCookie(req)
@@ -199,7 +199,7 @@ func (ds *DNSSECService) parse(raw []byte) ([]DNSSEC, error) {
 	digests := reDigest.FindAllStringSubmatch(string(raw), -1)
 
 	if len(keyTags) != len(algorithms) && len(algorithms) != len(digests) {
-		logger.Fatalf("%s has difference results.", alu.Caller())
+		logger.Printf("%s has difference results.", alu.Caller())
 		return nil, errors.New("DNSSEC data does not match regex patterns.")
 	}
 

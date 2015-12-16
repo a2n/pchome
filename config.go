@@ -40,14 +40,14 @@ func (cs *ConfigService) Init() error {
 				return err
 			}
 		} else {
-			logger.Fatalf("%s read config file failed, %s.", alu.Caller(), err.Error())
+			logger.Printf("%s read config file failed, %s.", alu.Caller(), err.Error())
 		}
 	}
 
 	var config Config
 	err = json.Unmarshal(b, &config)
 	if err != nil {
-		logger.Fatalf("%s unmarshal json failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s unmarshal json failed, %s.", alu.Caller(), err.Error())
 	}
 
 	return nil
@@ -64,22 +64,22 @@ func (cs *ConfigService) initNew() error {
 	fmt.Print("Paste your email here: ")
 	_, err := fmt.Scanln(&config.Email)
 	if err != nil {
-		logger.Fatalf("%s scan email string failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s scan email string failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Scan email string failed.")
 	}
 	if len(config.Email) == 0 {
-		logger.Fatal("%s has empty email.", alu.Caller())
+		logger.Printf("%s has empty email.", alu.Caller())
 		return errors.New("Empty email.")
 	}
 
 	fmt.Print("Paste your password here: ")
 	_, err = fmt.Scanln(&config.Password)
 	if err != nil {
-		logger.Fatalf("%s scan password string failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s scan password string failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Scan password string failed.")
 	}
 	if len(config.Password) == 0 {
-		logger.Fatal("%s has empty password.", alu.Caller())
+		logger.Printf("%s has empty password.", alu.Caller())
 		return errors.New("Empty password.")
 	}
 
@@ -89,7 +89,7 @@ func (cs *ConfigService) initNew() error {
 	}
 
 	if len(key) == 0 {
-		logger.Fatal("%s gets a empty key.", alu.Caller())
+		logger.Printf("%s gets a empty key.", alu.Caller())
 		return errors.New("Your email or password is wrong.")
 	}
 
@@ -228,14 +228,14 @@ func (cs *ConfigService) UpdateZones(s *Service) (map[string]Zone, error) {
 func (cs *ConfigService) Read() (Config, error) {
 	b, err := ioutil.ReadFile(DefaultConfigPath)
 	if err != nil {
-		logger.Fatalf("%s read configuration file failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s read configuration file failed, %s.", alu.Caller(), err.Error())
 		return Config{}, errors.New("Read configuration file failed.")
 	}
 
 	var config Config
 	err = json.Unmarshal(b, &config)
 	if err != nil {
-		logger.Fatalf("%s unmarshal json failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s unmarshal json failed, %s.", alu.Caller(), err.Error())
 		return config, errors.New("Unmarshal configuration json failed.")
 	}
 
@@ -246,7 +246,7 @@ func (cs *ConfigService) Read() (Config, error) {
 func (cs *ConfigService) Remove() error {
 	err := os.Remove(DefaultConfigPath)
 	if err != nil {
-		logger.Fatalf("%s remove the configuration file failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s remove the configuration file failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Failed to remove the configuration file.")
 	}
 
@@ -264,7 +264,7 @@ func (cs *ConfigService) Save(config *Config) error {
 	// Write
 	b, err := json.MarshalIndent(config, "", " ")
 	if err != nil {
-		logger.Fatalf("%s marshal json failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s marshal json failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Marshal json failed.")
 	}
 
@@ -273,17 +273,17 @@ func (cs *ConfigService) Save(config *Config) error {
 		if os.IsNotExist(err) {
 			file, err = os.Create(DefaultConfigPath)
 			if err != nil {
-				logger.Fatalf("%s creates configuration file failed, %s.", alu.Caller(), err.Error())
+				logger.Printf("%s creates configuration file failed, %s.", alu.Caller(), err.Error())
 				return errors.New("Create configuration file failed.")
 			} else {
 				file, err = os.OpenFile(DefaultConfigPath, os.O_RDWR, os.ModePerm)
 				if err != nil {
-					logger.Fatalf("%s opens configuration file failed, %s.", alu.Caller(), err.Error())
+					logger.Printf("%s opens configuration file failed, %s.", alu.Caller(), err.Error())
 					return errors.New("Open configuration file failed.")
 				}
 			}
 		} else {
-			logger.Fatalf("%s opens configuration file failed, %s.", alu.Caller(), err.Error())
+			logger.Printf("%s opens configuration file failed, %s.", alu.Caller(), err.Error())
 			return errors.New("Open configuration file failed.")
 		}
 	}
@@ -291,7 +291,7 @@ func (cs *ConfigService) Save(config *Config) error {
 	_, err = file.Write(b)
 	if err != nil {
 		file.Close()
-		logger.Fatalf("%s write configuration file failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s write configuration file failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Writing configuration file failed.")
 	}
 

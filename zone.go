@@ -39,7 +39,7 @@ func (zlc *ZoneListCall) Do() map[string]Zone {
 	urlstr := ENDPOINT + "/index.htm"
 	req, err := http.NewRequest("GET", urlstr, nil)
 	if err != nil {
-		logger.Fatalf("%s creates request failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s creates request failed, %s.", alu.Caller(), err.Error())
 	}
 	zlc.Service.SetCookie(req)
 

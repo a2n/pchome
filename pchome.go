@@ -24,7 +24,7 @@ var logger *log.Logger
 // 取得服務。
 func NewService(key string) *Service {
 	if len(key) == 0 {
-		logger.Fatalf("%s has empty key.", alu.Caller())
+		logger.Printf("%s has empty key.", alu.Caller())
 	}
 
 	return &Service {

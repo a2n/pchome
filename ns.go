@@ -34,19 +34,19 @@ func (ns *NSService) Add(zone, name, ip string) error {
 
 	// Zone
 	if _, ok := ns.config.Zones[zone]; !ok {
-		logger.Fatal("%s has no such zone name, %s.", alu.Caller(), zone)
+		logger.Printf("%s has no such zone name, %s.", alu.Caller(), zone)
 		return errors.New("No such zone name.")
 	}
 	ns.zone = zone
 
 	if len(ns.config.Zones[ns.zone].NS) == 5 {
-		logger.Fatal("%s, zone(%s) is reaching the max NS record count 5.", alu.Caller(), zone)
+		logger.Printf("%s, zone(%s) is reaching the max NS record count 5.", alu.Caller(), zone)
 		return errors.New("The zone is reaching the max NS record count 5, delete some records first.")
 	}
 
 	// Name
 	if _, ok := ns.config.Zones[ns.zone].NS[name]; ok {
-		logger.Fatal("%s has duplicated host name, %s.", alu.Caller(), name)
+		logger.Printf("%s has duplicated host name, %s.", alu.Caller(), name)
 		return errors.New("Duplicated host name.")
 	}
 
@@ -67,20 +67,20 @@ func (ns *NSService) Delete(zone, name, ip string) error {
 
 	// Zone
 	if _, ok := ns.config.Zones[zone]; !ok {
-		logger.Fatal("%s has no matched zone name, %s.", alu.Caller(), zone)
+		logger.Printf("%s has no matched zone name, %s.", alu.Caller(), zone)
 		return errors.New("No matched zone name.")
 	}
 	ns.zone = zone
 
 	// Name
 	if _, ok := ns.config.Zones[ns.zone].NS[name]; !ok {
-		logger.Fatal("%s no matched host name, %s.", alu.Caller(), name)
+		logger.Printf("%s no matched host name, %s.", alu.Caller(), name)
 		return errors.New("No matched host name.")
 	}
 
 	// IP
 	if ns.config.Zones[ns.zone].NS[name] != ip {
-		logger.Fatal("%s has no matched recrods, %s.", alu.Caller, ip)
+		logger.Printf("%s has no matched recrods, %s.", alu.Caller, ip)
 		return errors.New("No matched ip.")
 	}
 
@@ -101,14 +101,14 @@ func (ns *NSService) Update(zone, name, ip string) error {
 
 	// Zone
 	if _, ok := ns.config.Zones[zone]; !ok {
-		logger.Fatal("%s has no matched zone name, %s.", alu.Caller(), zone)
+		logger.Printf("%s has no matched zone name, %s.", alu.Caller(), zone)
 		return errors.New("No matched zone name.")
 	}
 	ns.zone = zone
 
 	// Name
 	if _, ok := ns.config.Zones[ns.zone].NS[name]; !ok {
-		logger.Fatal("%s no matched host name, %s.", alu.Caller(), name)
+		logger.Printf("%s no matched host name, %s.", alu.Caller(), name)
 		return errors.New("No matched host name.")
 	}
 
@@ -127,7 +127,7 @@ func (ns *NSService) save() error {
 	urlstr := ENDPOINT + "/dns_edit.php"
 	req, err := http.NewRequest("POST", urlstr, reader)
 	if err != nil {
-		logger.Fatalf("%s creates http request failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s creates http request failed, %s.", alu.Caller(), err.Error())
 		return errors.New("Creating http request failed.")
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -158,12 +158,12 @@ func (ns *NSService) preparePostData() url.Values {
 	idx := 0
 	for name, ip := range ns.config.Zones[ns.zone].NS {
 		data.Set("host_dn" + strconv.Itoa(idx), name)
-		data.Set("host_ip%d" + strconv.Itoa(idx), ip)
+		data.Set("host_ip" + strconv.Itoa(idx), ip)
 		idx++
 	}
 
 	for i := 0; i < 10; i++ {
-		data.Add("subhostf%d" + strconv.Itoa(i), "")
+		data.Add("subhostf" + strconv.Itoa(i), "")
 		data.Add("contentf" + strconv.Itoa(i), "")
 		data.Add("typef" + strconv.Itoa(i), "fwd")
 		data.Add("fwd_titlef" + strconv.Itoa(i), "")
@@ -180,13 +180,13 @@ func (ns *NSService) preparePostData() url.Values {
 // 列舉 PChome 網站的 NS 記錄。
 func (ns *NSService) List(zone string) (NS, error) {
 	if len(zone) == 0 {
-		logger.Fatalf("%s has empty zone name.", alu.Caller())
+		logger.Printf("%s has empty zone name.", alu.Caller())
 	}
 
 	urlstr := "http://myname.pchome.com.tw/manage/dns_edit.htm?dn=" + zone
 	req, err := http.NewRequest("GET", urlstr, nil)
 	if err != nil {
-		logger.Fatalf("%s creates request failed, %s.", alu.Caller(), err.Error())
+		logger.Printf("%s creates request failed, %s.", alu.Caller(), err.Error())
 		return nil, errors.New("Cannot create a http request.")
 	}
 	ns.Service.SetCookie(req)
@@ -222,7 +222,7 @@ func (ns *NSService) parse(raw []byte) (NS, error) {
 	reIP := regexp.MustCompile(`host_ip\d" value="((?:\d{1,3}\.){3}\d{1,3})"`)
 	ips := reIP.FindAllStringSubmatch(string(raw), -1)
 	if len(names) != len(ips) {
-		logger.Fatalf("%s has difference results.", alu.Caller())
+		logger.Printf("%s has difference results.", alu.Caller())
 		return nil, errors.New("NS data does not match regex patterns.")
 	}
 
